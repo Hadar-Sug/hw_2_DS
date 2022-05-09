@@ -10,7 +10,7 @@ def add_noise(data):
     :param data: dataset as numpy array of shape (n, 2)
     :return: data + noise, where noise~N(0,0.01^2)
     """
-    noise = np.random.normal(loc=0, scale=0.01, size=data.shape)
+    noise = np.random.distal(loc=0, scale=0.01, size=data.shape)
     return data + noise
 
 
@@ -67,7 +67,6 @@ def kmeans(data, k):
 
     # return labels, centroids
 
-
 def choose_centroid(x, centroids):
     """
     iterate over the centroids and find the one that minimizes the distance
@@ -76,13 +75,13 @@ def choose_centroid(x, centroids):
     :return: coordinates of one of the centroids
     """
     min_dist_index = 0
-    min_dist = np.linalg.norm(x - centroids[0])  # initialize with first centroid
+    min_dist = dist(x, centroids[0])  # initialize with first centroid
     for i in range(centroids.shape[0]):
-        this_dist = np.linalg.norm(x - centroids[i])
+        this_dist = dist(x, centroids[i])
         if this_dist < min_dist:
             min_dist = this_dist
             min_dist_index = i
-    return centroids[min_dist_index]
+    return min_dist_index
 
 
 def visualize_results(data, labels, centroids, path):
@@ -93,8 +92,20 @@ def visualize_results(data, labels, centroids, path):
     :param centroids: the final centroids of kmeans, as numpy array of shape (k, 2)
     :param path: path to save the figure to.
     """
-    pass
-    # plt.savefig(path)
+
+    labelled_data = np.append(data, labels, axis=1)
+    labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])
+    grouped = labels_df.groupby(['centroid']) # groupBy object
+    groups_size = grouped.size(as_index=True)  # is it a list?
+    grouped = grouped.to_frame().to_numpy()  # now numpy
+    last = 0
+    for size, centroid in zip(groups_size, centroids):
+        rand_color=np.random.rand()
+        plt.scatter(grouped[last:last + size, 0], grouped[last: last + size, 1], color=rand_color)
+        plt.scatter(grouped[, 0], grouped[last: last + size, 1], color=rand_color)
+        last = size
+    plt.show()
+    plt.savefig(path)
 
 
 def dist(x, y):
@@ -104,21 +115,7 @@ def dist(x, y):
     :param y: numpy array of size n
     :return: the euclidean distance
     """
-    pass
-    # return distance
-
-
-def assign_to_clusters(data, centroids):
-    """
-    Assign each data point to a cluster based on current centroids
-    :param data: data as numpy array of shape (n, 2)
-    :param centroids: current centroids as numpy array of shape (k, 2)
-    :return: numpy array of size n
-    """
-    labels = np.array(data.shape)
-    for i in range(data.shape[0]):  # till no changes occurred between following iterations
-        labels[i] = choose_centroid(data[i], centroids)
-    return labels
+    return np.sum((x - y) ** 2) ** 0.5  # check if this works
 
 
 def recompute_centroids(data, labels, k):
@@ -129,17 +126,21 @@ def recompute_centroids(data, labels, k):
     :param k: number of clusters
     :return: numpy array of shape (k, 2)
     """
-    labels_df = pd.DataFrame(labels, columns=["first coord, second coord"])
-    new_centroids = labels_df.groupby(['first coord', 'second coord']).mean()
+    # hope this works
+    labelled_data = np.append(data, labels, axis=1)
+    labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])
+    new_centroids = labels_df.groupby(['centroid'])[['first coord', 'second coord']].mean()  # lets see
     new_centroids = new_centroids.to_frame()
+    sort_centroids(new_centroids)
+    # sort here so we dont have to sort while comparing
     return new_centroids.to_numpy()
 
 
 def sort_centroids(centroids):
-    return sorted(centroids, key=lambda row: np.linalg.norm(row))
+    return centroids.sort(key=lambda row: dist(row, np.zeros(1, 2)))
 
 
 def equal_centroids(prev, curr):
-    prev_centroids = sort_centroids(prev)
+    prev_centroids = sort_centroids(prev)  # first we sort the centroids
     current_centroids = sort_centroids(curr)
-    return np.array_equal(prev_centroids, current_centroids)
+    return np.array_equal(prev_centroids, current_centroids)  # then we compare
