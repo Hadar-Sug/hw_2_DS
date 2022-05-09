@@ -130,4 +130,15 @@ def recompute_centroids(data, labels, k):
     :return: numpy array of shape (k, 2)
     """
     labels_df = pd.DataFrame(labels, columns=["first coord, second coord"])
-    labels_df.groupby('jfirst coord', 'second coord'])
+    new_centroids = labels_df.groupby(['first coord', 'second coord']).mean()
+    new_centroids = new_centroids.to_frame()
+    return new_centroids.to_numpy()
+
+
+def sort_centroids(centroids):
+    return sorted(centroids, key=lambda row: np.linalg.norm(row))
+
+def equal_centroids(prev, curr):
+    prev_centroids = sort_centroids(prev)
+    current_centroids = sort_centroids(curr)
+    return np.array_equal(prev_centroids, current_centroids)
