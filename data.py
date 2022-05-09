@@ -90,7 +90,18 @@ def add_is_weekend_holiday(df):
     :param df: the dataframe
     :return:
     """
-    df['is_weekend_holiday'] = df[['is_weekend', 'is_holiday']].apply(lambda x: x[0] and x[1])  # hope this works
+    df['is_weekend_holiday'] = df[['is_weekend', 'is_holiday']].apply(lambda x: weekend_orand_holiday(x), axis=0)  # hope this works
+
+
+def weekend_orand_holiday(x):
+    if x[0] == 0 and x[1] == 0:
+        return 0
+    if x[0] == 0 and x[1] == 1:
+        return 1
+    if x[0] == 1 and x[1] == 0:
+        return 2
+    if x[0] == 1 and x[1] == 1:
+        return 3
 
 
 def add_t_diff(df):
