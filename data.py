@@ -8,6 +8,7 @@ def load_data(path):
 
 def add_new_columns(df):
     add_season_name(df)
+    df['datetime'] = pd.to_datetime(df['timestamp'])
     add_day(df)
     add_month(df)
     add_year(df)
@@ -21,48 +22,56 @@ def add_new_columns(df):
 
 
 def add_season_name(df):
+    """
+    adds column with season name as string
+    :param df: the dataframe
+    :return:
+    """
     df['season_name'] = df['season'].apply(to_string_season)
 
 
-"""
-adds column with corresponding hour 
-"""
-
-
 def add_hour(df):
-    df['Hour'] = df['timestamp'].apply(lambda x: x.time.hour)
-
-
-"""
-adds column with corresponding day 
-"""
+    """
+    adds column with corresponding hour
+    :param df: the dataframe
+    :return:
+    """
+    df['Hour'] = df['datetime'].apply(lambda x: x.hour)
 
 
 def add_day(df):
-    df['Day'] = df['timestamp'].apply(lambda x: x.date.day)
+    """
+    adds column with corresponding day
+    :param df: the dataframe
+    :return:
+    """
 
-
-"""
-adds column with corresponding month
-"""
+    df['Day'] = df['datetime'].apply(lambda x: x.day)
 
 
 def add_month(df):
-    df['Month'] = df['timestamp'].apply(lambda x: x.date.month)
-
-
-"""
-adds column with corresponding year
-"""
+    """
+    adds column with corresponding month
+    :param df: the dataframe
+    :return:
+    """
+    df['Month'] = df['datetime'].apply(lambda x: x.month)
 
 
 def add_year(df):
-    df['Year'] = df['timestamp'].apply(lambda x: x.date.year)
+    """
+    adds column with corresponding year
+    :param df: the dataframe
+    :return:
+    """
+    df['Year'] = df['datetime'].apply(lambda x: x.year)
 
 
 def to_string_season(number):
     """
     adds a column with string type names based on integer column named season
+    :param number: number represents a season
+    :return: the corresponding season string
     """
     if number == 0:
         return "spring"
@@ -74,21 +83,22 @@ def to_string_season(number):
         return "winter"
 
 
-"""
-adds a binary column which is true only if is_holiday and is_weekend are true
-"""
-
-
+# need to check if this implementation is in fact correct
 def add_is_weekend_holiday(df):
+    """
+    adds a binary column which is true only if is_holiday and is_weekend are true
+    :param df: the dataframe
+    :return:
+    """
     df['is_weekend_holiday'] = df[['is_weekend', 'is_holiday']].apply(lambda x: x[0] and x[1])  # hope this works
 
 
-"""
-adds column with the delta between t2 and t1 : t2-t1
-"""
-
-
 def add_t_diff(df):
+    """
+    adds column with the delta between t2 and t1 : t2-t1
+    :param df: the dateframe
+    :return:
+    """
     df['t_diff'] = df[['t1', 't2']].apply(lambda x: x[1] - x[0])
 
 

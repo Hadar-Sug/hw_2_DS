@@ -138,6 +138,7 @@ def recompute_centroids(data, labels, k):
 def sort_centroids(centroids):
     return sorted(centroids, key=lambda row: np.linalg.norm(row))
 
+
 def equal_centroids(prev, curr):
     prev_centroids = sort_centroids(prev)
     current_centroids = sort_centroids(curr)
