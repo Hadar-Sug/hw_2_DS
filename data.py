@@ -8,7 +8,7 @@ def load_data(path):
 
 def add_new_columns(df):
     add_season_name(df)
-    df['timestamp'] = pd.to_datetime(df['timestamp'], format='%d/%m/%Y %H:%M')
+    df['datetime'] = pd.to_datetime(df['timestamp'], format='%d/%m/%Y %H:%M')
     add_day(df)
     add_month(df)
     add_year(df)
@@ -90,7 +90,8 @@ def add_is_weekend_holiday(df):
     :param df: the dataframe
     :return:
     """
-    df['is_weekend_holiday'] = df[['is_weekend', 'is_holiday']].apply(lambda x: weekend_orand_holiday(x), axis=0)  # hope this works
+    df['is_weekend_holiday'] = df[['is_weekend', 'is_holiday']].apply(lambda x: weekend_orand_holiday(x),
+                                                                      axis=0)  # hope this works
 
 
 def weekend_orand_holiday(x):
@@ -125,7 +126,7 @@ def data_analysis(df):
     print(corr.to_string())
     print()
     correlation_dict, rev_correlation_dict = corr_dict(df)
-    top_5 = correlation_dict[1:5]
+    #top_5 = {k: correlation_dict[k] for k in correlation_dict.keys()[0:4]}
     low_5 = reversed(rev_correlation_dict[1:5])
     print_corr_details(top_5)
     print()
@@ -136,7 +137,8 @@ def data_analysis(df):
 
 # data_analysis aiding methods
 def corr_dict(df):
-    corr_dictionary = {('i', 'j'): df.corr(i, j) for i, j in df.columns if j != i}
+    # for col1,col2 in zip(df.columns, df.columns)
+    corr_dictionary = {('i', 'j'): df.corr(i, j) for i, j in zip(df.columns, df.columns) if j != i} # do this manually cuz it dont work
     corr_dictionary = dict(sorted(corr_dictionary.items(), key=lambda x: abs(x[1])))
     corr_dictionary_reversed = dict(sorted(corr_dictionary.items(), key=lambda x: abs(x[1]), reverse=True))
     return corr_dictionary, corr_dictionary_reversed

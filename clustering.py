@@ -96,10 +96,12 @@ def recompute_centroids(data, labels, k):
     # edge case - what if the number of centroids dips below k
     labelled_data = np.append(data, labels, axis=1)  # add label for each datapoint (label column)
     labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])  # lets get it as a pds
-    new_centroids = labels_df.sort_values('centroid').groupby(['centroid'])[
-        'first coord', 'second coord'].mean()  # added sort values by centroid, i think this eliminates the need for sorting the centroids later
-    new_centroids = new_centroids.to_frame()
-    return new_centroids.to_numpy()
+    sorted_centroids = labels_df.sort_values('centroid').groupby(['centroid'])  # sort and then groupby centroids
+    first_coord_mean = sorted_centroids['first coord'].mean()  # get the mean for the first coordinate
+    second_coord_mean = sorted_centroids['second coord'].mean()  # mean for second coordinate
+    first_coord_mean = first_coord_mean.to_frame().to_numpy()  # make both a numpy array
+    second_coord_mean = second_coord_mean.to_frame().to_numpy()
+    return np.append(first_coord_mean, second_coord_mean, axis=1)  # merge and return
 
 
 def visualize_results(data, labels, centroids, path):
@@ -113,7 +115,7 @@ def visualize_results(data, labels, centroids, path):
 
     labelled_data = np.append(data, labels, axis=1)
     labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])
-    grouped = labels_df.groupby(['centroid'])  # groupBy object
+    grouped = labels_df.sort_values(['centroid']).groupby(['centroid'])  # groupBy object
     groups_size = grouped.size(as_index=True)  # is it a list?
     grouped = grouped.to_frame().to_numpy()  # now numpy
     last = 0
