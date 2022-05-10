@@ -8,7 +8,7 @@ def load_data(path):
 
 def add_new_columns(df):
     add_season_name(df)
-    df['datetime'] = pd.to_datetime(df['timestamp'])
+    df['timestamp'] = pd.to_datetime(df['timestamp'], format='%d/%m/%Y %H:%M')
     add_day(df)
     add_month(df)
     add_year(df)

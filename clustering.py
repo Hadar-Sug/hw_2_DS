@@ -10,7 +10,7 @@ def add_noise(data):
     :param data: dataset as numpy array of shape (n, 2)
     :return: data + noise, where noise~N(0,0.01^2)
     """
-    noise = np.random.distal(loc=0, scale=0.01, size=data.shape)
+    noise = np.random.normal(loc=0, scale=0.01, size=data.shape)
     return data + noise
 
 
@@ -37,9 +37,9 @@ def transform_data(df, features):
     :return: transformed data as numpy array of shape (n, 2)
     """
     transformed_data = df[features]
-    minimums = [min(transformed_data[0]), min(transformed_data[1])]
+    minimums = [min(transformed_data[0]), min(transformed_data[1])]  # scaling params
     sums = [sum(transformed_data[0]), sum(transformed_data[1])]
-    for i in range(2):
+    for i in range(2):  # actual scaling
         transformed_data[features[i]] = transformed_data[features[i]].apply(lambda x: (x - minimums[i]) / sums[i])
     return add_noise(transformed_data.to_numpy())
 
@@ -84,6 +84,24 @@ def choose_centroid(x, centroids):
     return min_dist_index
 
 
+def recompute_centroids(data, labels, k):
+    """
+    Recomputes new centroids based on the current assignment
+    :param data: data as numpy array of shape (n, 2)
+    :param labels: current assignments to clusters for each data point, as numpy array of size n
+    :param k: number of clusters
+    :return: numpy array of shape (k, 2)
+    """
+    # hope this works
+    # edge case - what if the number of centroids dips below k
+    labelled_data = np.append(data, labels, axis=1)  # add label for each datapoint (label column)
+    labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])  # lets get it as a pds
+    new_centroids = labels_df.sort_values('centroid').groupby(['centroid'])[
+        'first coord', 'second coord'].mean()  # added sort values by centroid, i think this eliminates the need for sorting the centroids later
+    new_centroids = new_centroids.to_frame()
+    return new_centroids.to_numpy()
+
+
 def visualize_results(data, labels, centroids, path):
     """
     Visualizing results of the kmeans model, and saving the figure.
@@ -95,14 +113,14 @@ def visualize_results(data, labels, centroids, path):
 
     labelled_data = np.append(data, labels, axis=1)
     labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])
-    grouped = labels_df.groupby(['centroid']) # groupBy object
+    grouped = labels_df.groupby(['centroid'])  # groupBy object
     groups_size = grouped.size(as_index=True)  # is it a list?
     grouped = grouped.to_frame().to_numpy()  # now numpy
     last = 0
     for size, centroid in zip(groups_size, centroids):
-        rand_color=np.random.rand()
+        rand_color = np.random.rand()
         plt.scatter(grouped[last:last + size, 0], grouped[last: last + size, 1], color=rand_color)
-        plt.scatter(grouped[, 0], grouped[last: last + size, 1], color=rand_color)
+        plt.scatter(grouped[, 0], grouped[last: last + size, 1], color = rand_color)
         last = size
     plt.show()
     plt.savefig(path)
@@ -116,24 +134,6 @@ def dist(x, y):
     :return: the euclidean distance
     """
     return np.sum((x - y) ** 2) ** 0.5  # check if this works
-
-
-def recompute_centroids(data, labels, k):
-    """
-    Recomputes new centroids based on the current assignment
-    :param data: data as numpy array of shape (n, 2)
-    :param labels: current assignments to clusters for each data point, as numpy array of size n
-    :param k: number of clusters
-    :return: numpy array of shape (k, 2)
-    """
-    # hope this works
-    labelled_data = np.append(data, labels, axis=1)
-    labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])
-    new_centroids = labels_df.groupby(['centroid'])[['first coord', 'second coord']].mean()  # lets see
-    new_centroids = new_centroids.to_frame()
-    sort_centroids(new_centroids)
-    # sort here so we dont have to sort while comparing
-    return new_centroids.to_numpy()
 
 
 def sort_centroids(centroids):
