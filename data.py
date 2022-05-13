@@ -9,10 +9,10 @@ def load_data(path):
 def add_new_columns(df):
     add_season_name(df)
     df['datetime'] = pd.to_datetime(df['timestamp'], format='%d/%m/%Y %H:%M')
+    add_hour(df)
     add_day(df)
     add_month(df)
     add_year(df)
-    add_hour(df)
     add_is_weekend_holiday(df)
     add_t_diff(df)
     return df
@@ -90,7 +90,7 @@ def add_is_weekend_holiday(df):
     :param df: the dataframe
     :return:
     """
-    df['is_weekend_holiday'] = df.apply(lambda x: weekend_orand_holiday(x.is_weekend, x.is_holiday), axis=1)
+    df['is_weekend_holiday'] = df.apply(lambda x: weekend_orand_holiday(x.is_holiday, x.is_weekend), axis=1)
 
 
 def weekend_orand_holiday(x, y):
@@ -123,37 +123,39 @@ def data_analysis(df):
     print("corr output:")
     corr = df.corr()
     print(corr.to_string())
-    print("test")
-    top_5 = corr_dict(corr)
-    # for item in top_5:
-    #   print(item)
-
-    # print_corr_details(low_5)
+    print()
+    get_top5_bot5(corr)
+    print()
+    means_by_t_diff(df)
+    print()
     # means_array = means_by_t_diff(df)
     # print_corr_t_diff(means_array)
 
 
 # data_analysis aiding methods
-def corr_dict(df):
+def get_top5_bot5(df):
+    """
+    creates a correlation dictionary from the df, then gets the top 5 (high to low) and bottom 5 (low to high)
+    :param df: the dataframe were turning into a dict
+    :return: prints the top 5 and bottom 5
+    """
     corr_dictionary = dict()
-    for i, row in enumerate(df.index):
-        for column in df.columns[i + 1:-1]:
+    for i, row in zip(range(len(df.index)), df.index):
+        for j, column in enumerate(df.columns[i + 1:len(df.columns)]):
             key = (row, column)
-            corr_dictionary[key] = df.get(row)[column]
-    sorted_list = sorted(corr_dictionary.items(), key=lambda x: x[1])
-    print(sorted_list[0])
-    return corr_dictionary
+            corr_dictionary[key] = abs(df.get(row)[column])
 
-    # sorted_items = sorted(corr_dictionary.values(), key=lambda x: abs(x[1]))
-    # corr_dictionary= list(corr_dictionary.items())
-    # print(type(corr_dictionary))
-    # corr_dictionary = corr_dictionary.sort(key=lambda y: abs(y[1]))
-
-    # print()
-    # print((sorted(corr_dictionary.items(), key=lambda x: abs(x[1]))))
-    # top_5 = sorted_items[:5]
-    # reversed_sorted_items = sorted(corr_dictionary.items(), key=lambda x: abs(x[1]), reverse=True)
-    # bottom_5 = reversed_sorted_items[:5]
+    sorted_list = sorted(corr_dictionary.items(), key=lambda x: x[1], reverse=True)
+    sorted_list_reversed = sorted(corr_dictionary.items(), key=lambda x: x[1])
+    top_5 = sorted_list[:5]
+    bot_5 = sorted_list_reversed[:5]
+    print("Highest correlated are: ")
+    for i, item in enumerate(top_5):
+        print(f"{i + 1}. {item[0]} with {item[1]:.6f}")
+    print()
+    print("Lowest correlated are: ")
+    for i, item in enumerate(bot_5):
+        print(f"{i + 1}. {item[0]} with {item[1]:.6f}")
 
 
 def print_corr_details(dictionary):
@@ -162,11 +164,15 @@ def print_corr_details(dictionary):
 
 
 def means_by_t_diff(df):
-    total_means = []
-    df_groupby = df.groupby(['season_name'])['t_diff'].mean().to_frame(name='mean_t_diff').reset_index()
-    total_means.append((df_groupby.iloc[i, 0], df_groupby.iloc[i, 1]) for i in range(4))
-    total_means.append(('All', df['t_diff'].mean()))
-    return total_means
+    df_groupby = df.groupby(['season_name'])['t_diff'].mean().to_frame()
+    for season, mean in zip(df_groupby.index, df_groupby['t_diff']):
+        print(f"{season} average t_diff is {mean:.2f}")
+    print(f"All average t_diff is {df['t_diff'].mean():.2f}")
+
+    # df_groupby = df.groupby(['season_name'])['t_diff'].mean().to_frame(name='mean_t_diff').reset_index()
+    # total_means.append((df_groupby.iloc[i, 0], df_groupby.iloc[i, 1]) for i in range(4))
+    # total_means.append(('All', df['t_diff'].mean()))
+    # return total_means
 
 
 def print_corr_t_diff(means):

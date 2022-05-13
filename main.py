@@ -9,7 +9,7 @@ def part_a(argv):
 
 
 def main(argv):
-    print("part A")
+    print("Part A: ")
     part_a(argv)
 
 
