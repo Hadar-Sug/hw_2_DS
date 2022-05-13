@@ -124,24 +124,42 @@ def data_analysis(df):
     print("corr output:")
     corr = df.corr()
     print(corr.to_string())
-    print()
-    correlation_dict, rev_correlation_dict = corr_dict(df)
-    #top_5 = {k: correlation_dict[k] for k in correlation_dict.keys()[0:4]}
-    low_5 = reversed(rev_correlation_dict[1:5])
-    print_corr_details(top_5)
-    print()
-    print_corr_details(low_5)
-    means_array = means_by_t_diff(df)
-    print_corr_t_diff(means_array)
+    print("test")
+    top_5 = corr_dict(corr)
+    #for item in top_5:
+     #   print(item)
+
+    # print_corr_details(low_5)
+    # means_array = means_by_t_diff(df)
+    # print_corr_t_diff(means_array)
 
 
 # data_analysis aiding methods
 def corr_dict(df):
-    # for col1,col2 in zip(df.columns, df.columns)
-    corr_dictionary = {('i', 'j'): df.corr(i, j) for i, j in zip(df.columns, df.columns) if j != i} # do this manually cuz it dont work
-    corr_dictionary = dict(sorted(corr_dictionary.items(), key=lambda x: abs(x[1])))
-    corr_dictionary_reversed = dict(sorted(corr_dictionary.items(), key=lambda x: abs(x[1]), reverse=True))
-    return corr_dictionary, corr_dictionary_reversed
+    corr_dictionary = dict()
+    for i, row in enumerate(df.index):
+        for column in df.columns[i + 1:-1]:
+            key = (row, column)
+            corr_dictionary[key] = df.get(row)[column]
+    dict_items = list(corr_dictionary.items())
+    # for item in dict_items:
+    #     print(item[1])
+
+    dict_items.sort(key=lambda item: abs(item[1]))
+    sorted_items= sorted(dict_items, key=lambda val: val[1][1])
+    return dict_items
+
+    # sorted_items = sorted(corr_dictionary.values(), key=lambda x: abs(x[1]))
+    # corr_dictionary= list(corr_dictionary.items())
+    # print(type(corr_dictionary))
+    # corr_dictionary = corr_dictionary.sort(key=lambda y: abs(y[1]))
+
+    # print()
+    # print((sorted(corr_dictionary.items(), key=lambda x: abs(x[1]))))
+    # top_5 = sorted_items[:5]
+    # reversed_sorted_items = sorted(corr_dictionary.items(), key=lambda x: abs(x[1]), reverse=True)
+    # bottom_5 = reversed_sorted_items[:5]
+
 
 
 def print_corr_details(dictionary):
