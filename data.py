@@ -90,18 +90,17 @@ def add_is_weekend_holiday(df):
     :param df: the dataframe
     :return:
     """
-    df['is_weekend_holiday'] = df[['is_weekend', 'is_holiday']].apply(lambda x: weekend_orand_holiday(x),
-                                                                      axis=0)  # hope this works
+    df['is_weekend_holiday'] = df.apply(lambda x: weekend_orand_holiday(x.is_weekend, x.is_holiday), axis=1)
 
 
-def weekend_orand_holiday(x):
-    if x[0] == 0 and x[1] == 0:
+def weekend_orand_holiday(x, y):
+    if x == 0 and y == 0:
         return 0
-    if x[0] == 0 and x[1] == 1:
+    if x == 0 and y == 1:
         return 1
-    if x[0] == 1 and x[1] == 0:
+    if x == 1 and y == 0:
         return 2
-    if x[0] == 1 and x[1] == 1:
+    if x == 1 and y == 1:
         return 3
 
 
@@ -111,7 +110,7 @@ def add_t_diff(df):
     :param df: the dateframe
     :return:
     """
-    df['t_diff'] = df[['t1', 't2']].apply(lambda x: x[1] - x[0])
+    df['t_diff'] = df.apply(lambda x: x.t2 - x.t1, axis=1)
 
 
 # end of methods for add_new_columns
@@ -126,8 +125,8 @@ def data_analysis(df):
     print(corr.to_string())
     print("test")
     top_5 = corr_dict(corr)
-    #for item in top_5:
-     #   print(item)
+    # for item in top_5:
+    #   print(item)
 
     # print_corr_details(low_5)
     # means_array = means_by_t_diff(df)
@@ -141,13 +140,9 @@ def corr_dict(df):
         for column in df.columns[i + 1:-1]:
             key = (row, column)
             corr_dictionary[key] = df.get(row)[column]
-    dict_items = list(corr_dictionary.items())
-    # for item in dict_items:
-    #     print(item[1])
-
-    dict_items.sort(key=lambda item: abs(item[1]))
-    sorted_items= sorted(dict_items, key=lambda val: val[1][1])
-    return dict_items
+    sorted_list = sorted(corr_dictionary.items(), key=lambda x: x[1])
+    print(sorted_list[0])
+    return corr_dictionary
 
     # sorted_items = sorted(corr_dictionary.values(), key=lambda x: abs(x[1]))
     # corr_dictionary= list(corr_dictionary.items())
@@ -159,7 +154,6 @@ def corr_dict(df):
     # top_5 = sorted_items[:5]
     # reversed_sorted_items = sorted(corr_dictionary.items(), key=lambda x: abs(x[1]), reverse=True)
     # bottom_5 = reversed_sorted_items[:5]
-
 
 
 def print_corr_details(dictionary):
