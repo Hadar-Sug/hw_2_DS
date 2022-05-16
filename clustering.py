@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+pd.options.mode.chained_assignment = None
 np.random.seed(2)
 
 
@@ -37,8 +38,11 @@ def transform_data(df, features):
     :return: transformed data as numpy array of shape (n, 2)
     """
     transformed_data = df[features]
-    minimums = [min(transformed_data[0]), min(transformed_data[1])]  # scaling params
-    sums = [sum(transformed_data[0]), sum(transformed_data[1])]
+    feature_1 = features[0]
+    feature_2 = features[1]
+
+    minimums = [min(transformed_data[feature_1]), min(transformed_data[feature_2])]  # scaling params
+    sums = [sum(transformed_data[feature_1]), sum(transformed_data[feature_2])]
     for i in range(2):  # actual scaling
         transformed_data[features[i]] = transformed_data[features[i]].apply(lambda x: (x - minimums[i]) / sums[i])
     return add_noise(transformed_data.to_numpy())
@@ -75,6 +79,7 @@ def choose_centroid(x, centroids):
     :return: coordinates of one of the centroids
     """
     min_dist_index = 0
+    test = centroids[0]
     min_dist = dist(x, centroids[0])  # initialize with first centroid
     for i in range(centroids.shape[0]):
         this_dist = dist(x, centroids[i])
@@ -96,12 +101,9 @@ def recompute_centroids(data, labels, k):
     # edge case - what if the number of centroids dips below k
     labelled_data = np.append(data, labels, axis=1)  # add label for each datapoint (label column)
     labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])  # lets get it as a pds
-    sorted_centroids = labels_df.sort_values('centroid').groupby(['centroid'])  # sort and then groupby centroids
-    first_coord_mean = sorted_centroids['first coord'].mean()  # get the mean for the first coordinate
-    second_coord_mean = sorted_centroids['second coord'].mean()  # mean for second coordinate
-    first_coord_mean = first_coord_mean.to_frame().to_numpy()  # make both a numpy array
-    second_coord_mean = second_coord_mean.to_frame().to_numpy()
-    return np.append(first_coord_mean, second_coord_mean, axis=1)  # merge and return
+    averaged_centroids = labels_df.sort_values('centroid').groupby(
+        ['centroid']).mean()  # sort and then mean grouped-by centroids
+    return averaged_centroids.to_numpy()
 
 
 def visualize_results(data, labels, centroids, path):
@@ -116,8 +118,8 @@ def visualize_results(data, labels, centroids, path):
     labelled_data = np.append(data, labels, axis=1)
     labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])
     grouped = labels_df.sort_values(['centroid']).groupby(['centroid'])  # groupBy object
-    groups_size = grouped.size(as_index=True)  # is it a list?
-    grouped = grouped.to_frame().to_numpy()  # now numpy
+    groups_size = grouped.size()  # is it a list?
+    grouped = grouped.unstack()
     last = 0
     for size, centroid in zip(groups_size, centroids):
         rand_color = np.random.rand()
@@ -135,7 +137,7 @@ def dist(x, y):
     :param y: numpy array of size n
     :return: the euclidean distance
     """
-    return np.sum((x - y) ** 2) ** 0.5  # check if this works
+    return (np.sum((x - y) ** 2)) ** 0.5  # check if this works
 
 
 def sort_centroids(centroids):
