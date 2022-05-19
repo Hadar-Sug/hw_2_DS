@@ -103,6 +103,12 @@ def add_is_weekend_holiday(df):
 
 
 def weekend_orand_holiday(x, y):
+    """
+    aiding function to decide val of is_weekend_holiday col
+    :param x: holiday val
+    :param y: weekend val
+    :return: corresponding val based on given table
+    """
     if x == 0 and y == 0:
         return 0
     if x == 0 and y == 1:
@@ -116,7 +122,7 @@ def weekend_orand_holiday(x, y):
 def add_t_diff(df):
     """
     adds column with the delta between t2 and t1 : t2-t1
-    :param df: the dateframe
+    :param df: the dataframe
     :return:
     """
     df['t_diff'] = df.apply(lambda x: x.t2 - x.t1, axis=1)
@@ -154,16 +160,16 @@ def get_top5_bot5(df):
     :return: prints the top 5 and bottom 5
     """
     corr_dictionary = dict()
-    for i, row in zip(range(len(df.index)), df.index):
+    for i, row in zip(range(len(df.index)), df.index):  # let's create the corr dictionary
         for j, column in enumerate(df.columns[i + 1:len(df.columns)]):
             key = (row, column)
             corr_dictionary[key] = abs(df.get(row)[column])
 
-    sorted_list = sorted(corr_dictionary.items(), key=lambda x: x[1], reverse=True)
-    sorted_list_reversed = sorted(corr_dictionary.items(), key=lambda x: x[1])
-    top_5 = sorted_list[:5]
+    sorted_list = sorted(corr_dictionary.items(), key=lambda x: x[1], reverse=True)  # sorted correlation list
+    sorted_list_reversed = sorted(corr_dictionary.items(), key=lambda x: x[1])  # reversed list
+    top_5 = sorted_list[:5]  # slice list to get top 5
     bot_5 = sorted_list_reversed[:5]
-    print("Highest correlated are: ")
+    print("Highest correlated are: ")  # print items as requested
     for i, item in enumerate(top_5):
         print(f"{i + 1}. {item[0]} with {item[1]:.6f}")
     print()
