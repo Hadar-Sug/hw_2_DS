@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 pd.options.mode.chained_assignment = None
 np.random.seed(2)
 
@@ -79,7 +78,6 @@ def choose_centroid(x, centroids):
     :return: coordinates of one of the centroids
     """
     min_dist_index = 0
-    test = centroids[0]
     min_dist = dist(x, centroids[0])  # initialize with first centroid
     for i in range(centroids.shape[0]):
         this_dist = dist(x, centroids[i])
@@ -97,8 +95,6 @@ def recompute_centroids(data, labels, k):
     :param k: number of clusters
     :return: numpy array of shape (k, 2)
     """
-    # hope this works
-    # edge case - what if the number of centroids dips below k
     labelled_data = np.append(data, labels, axis=1)  # add label for each datapoint (label column)
     labels_df = pd.DataFrame(labelled_data, columns=['first coord', 'second coord', 'centroid'])  # lets get it as a pds
     averaged_centroids = labels_df.sort_values('centroid').groupby(
@@ -127,7 +123,6 @@ def visualize_results(data, labels, centroids, path):
         plt.scatter(grouped[, 0], grouped[last: last + size, 1], color = rand_color)
         last = size
     plt.show()
-    plt.savefig(path)
 
 
 def dist(x, y):

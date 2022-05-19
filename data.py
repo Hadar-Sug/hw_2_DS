@@ -1,12 +1,21 @@
 import pandas as pd
-from datetime import datetime
 
 
 def load_data(path):
+    """
+    loads file from path to pandas df
+    :param path: location of file
+    :return: pandas df
+    """
     return pd.read_csv(path)
 
 
 def add_new_columns(df):
+    """
+    adds new columns to the df
+    :param df: the df
+    :return: df with new columns
+    """
     add_season_name(df)
     df['datetime'] = pd.to_datetime(df['timestamp'], format='%d/%m/%Y %H:%M')
     add_hour(df)
@@ -117,6 +126,13 @@ def add_t_diff(df):
 
 
 def data_analysis(df):
+    """
+    prints corr matrix
+    top 5 correlated
+    and bot 5 correlated
+    :param df: the df
+    :return:
+    """
     print("describe output:")
     print(df.describe().to_string())
     print()
@@ -128,8 +144,6 @@ def data_analysis(df):
     print()
     means_by_t_diff(df)
     print()
-    # means_array = means_by_t_diff(df)
-    # print_corr_t_diff(means_array)
 
 
 # data_analysis aiding methods
@@ -158,23 +172,13 @@ def get_top5_bot5(df):
         print(f"{i + 1}. {item[0]} with {item[1]:.6f}")
 
 
-def print_corr_details(dictionary):
-    for i, key, val in enumerate(dictionary):
-        print(f"{i}. {key} with {val:.6f}")
-
-
 def means_by_t_diff(df):
-    df_groupby = df.groupby(['season_name'])['t_diff'].mean().to_frame()
-    for season, mean in zip(df_groupby.index, df_groupby['t_diff']):
+    """
+    prints means for t_diff column for each season and all seasons
+    :param df: the df
+    :return:
+    """
+    df_grouped = df.groupby(['season_name'])['t_diff'].mean().to_frame()  # group by season and get mean
+    for season, mean in zip(df_grouped.index, df_grouped['t_diff']):
         print(f"{season} average t_diff is {mean:.2f}")
     print(f"All average t_diff is {df['t_diff'].mean():.2f}")
-
-    # df_groupby = df.groupby(['season_name'])['t_diff'].mean().to_frame(name='mean_t_diff').reset_index()
-    # total_means.append((df_groupby.iloc[i, 0], df_groupby.iloc[i, 1]) for i in range(4))
-    # total_means.append(('All', df['t_diff'].mean()))
-    # return total_means
-
-
-def print_corr_t_diff(means):
-    for t_mean in means:
-        print(f"{t_mean[0]:.2f} average t_diff is {t_mean[1]:.2f}")
