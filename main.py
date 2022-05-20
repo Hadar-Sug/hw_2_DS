@@ -16,11 +16,11 @@ def part_b(the_data):
         labels, centroids = clustering.kmeans(df_trans, k)
         print(np.array_str(centroids, precision=3, suppress_small=True))
         print()
-        clustering.visualize_results(df_trans, labels, centroids, "/home/student/projects/hw2/")
+        clustering.visualize_results(df_trans, labels, centroids, f"./kmeans_{k}")
 
 
 def main():
-    path = "./london_sample_500.csv"
+    path = "./london.csv"
     df = data.load_data(path)
     print("Part A: ")
     part_a(df)
